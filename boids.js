@@ -30,7 +30,7 @@ class Boid {
         this.neighbours = [];
     }
 
-    move() {
+    move(width, height) {
         this.vx += this.ax;
         this.vy += this.ay;
 
@@ -48,16 +48,16 @@ class Boid {
         if (this.x < 0) {
             this.x = 0;
             this.vx *= -1;
-        } else if (this.x > 500) {
-            this.x = 500;
+        } else if (this.x > width) {
+            this.x = width;
             this.vx *= -1;
         }
 
         if (this.y < 0) {
             this.y = 0;
             this.vy *= -1;
-        } else if (this.y > 500) {
-            this.y = 500;
+        } else if (this.y > height) {
+            this.y = height;
             this.vy *= -1;
         }
 
@@ -132,11 +132,29 @@ class Board {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
         this.boids = [];
+        this.resizeCanvas();
+        this.initializeBoids(boidsCount);
+
+        window.addEventListener("resize", () => this.resizeCanvas());
+    }
+
+    resizeCanvas() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+    }
+
+    initializeBoids(boidsCount) {
+        this.boids = [];
         for (let i = 0; i < boidsCount; i++) {
-            this.boids.push(new Boid(randomInclusiveInt(0, 500), randomInclusiveInt(0, 500)));
+            this.boids.push(
+                new Boid(
+                    randomInclusiveInt(0, this.width),
+                    randomInclusiveInt(0, this.height)
+                )
+            );
         }
-        this.ctx.fillStyle = "green";
-        this.ctx.fillRect(10, 10, 100, 100);
     }
 
     updateNeighbours() {
@@ -157,16 +175,18 @@ class Board {
 
     draw() {
         this.ctx.fillStyle = "white";
-        this.ctx.fillRect(0, 0, 500, 500);
+        this.ctx.fillRect(0, 0, this.width, this.height);
 
         this.ctx.fillStyle = "red";
-        for (const boid of this.boids) this.ctx.fillRect(boid.x - 5, boid.y - 5, 10, 10);
+        for (const boid of this.boids) {
+            this.ctx.fillRect(boid.x - 5, boid.y - 5, 10, 10);
+        }
     }
 
     update() {
         this.updateNeighbours();
         for (const boid of this.boids) boid.update();
-        for (const boid of this.boids) boid.move();
+        for (const boid of this.boids) boid.move(this.width, this.height);
         this.draw();
     }
 }
