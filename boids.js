@@ -1,10 +1,12 @@
 const BOIDS = 100;
 const DISTANCE_SQUARED = 100 ** 2;
-const SEPARATION_POWER = 1;
-const SEPARATION_DISTANCE_SQUARED = 100 ** 2;
-const ALIGNMENT_POWER = 1;
+const SEPARATION_POWER = 5;
+const SEPARATION_DISTANCE_SQUARED = 20 ** 2;
+const ALIGNMENT_POWER = 2;
 const COHESION_POWER = 1;
-const SPEED = 5;
+const MAX_VELOCITY = 5;
+const MAX_ACCELERATION = 0.5;
+const FRICTION = 0.8;
 
 function distanceSquared(u, v) {
     const dx = u.x - v.x;
@@ -21,56 +23,67 @@ class Boid {
         this.x = x;
         this.y = y;
         const angle = Math.random() * Math.PI * 2;
-        this.vx = Math.cos(angle) * SPEED;
-        this.vy = Math.sin(angle) * SPEED;
+        this.vx = Math.cos(angle) * MAX_ACCELERATION;
+        this.vy = Math.sin(angle) * MAX_ACCELERATION;
+        this.ax = 0;
+        this.ay = 0;
         this.neighbours = [];
     }
 
     move() {
-        const magnitude = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
-        if (magnitude > 0) {
-            this.vx /= magnitude;
-            this.vy /= magnitude;
-        }
+        this.vx += this.ax;
+        this.vy += this.ay;
 
-        this.x += this.vx * SPEED;
-        this.y += this.vy * SPEED;
+        const velMagnitude = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        if (velMagnitude > MAX_VELOCITY) {
+            this.vx = (this.vx / velMagnitude) * MAX_VELOCITY;
+            this.vy = (this.vy / velMagnitude) * MAX_VELOCITY;
+        }
+        this.vx * FRICTION;
+        this.vy * FRICTION;
+
+        this.x += this.vx;
+        this.y += this.vy;
 
         if (this.x < 0) {
-            this.x = 0
+            this.x = 0;
             this.vx *= -1;
         } else if (this.x > 500) {
-            this.x = 500
+            this.x = 500;
             this.vx *= -1;
         }
 
         if (this.y < 0) {
-            this.y = 0
+            this.y = 0;
             this.vy *= -1;
         } else if (this.y > 500) {
-            this.y = 500
+            this.y = 500;
             this.vy *= -1;
         }
+
+        this.ax = 0;
+        this.ay = 0;
     }
 
     separation() {
         let sumX = 0;
         let sumY = 0;
-        let count = 0
+        let count = 0;
         for (const boid of this.neighbours) {
             if (distanceSquared(this, boid) < SEPARATION_DISTANCE_SQUARED) {
                 sumX += this.x - boid.x;
                 sumY += this.y - boid.y;
-                count++
+                count++;
             }
         }
 
         if (count === 0) return;
-        this.vx += sumX / count * SEPARATION_POWER;
-        this.vy += sumY / count * SEPARATION_POWER;
+        this.ax += (sumX / count) * SEPARATION_POWER;
+        this.ay += (sumY / count) * SEPARATION_POWER;
     }
 
     alignment() {
+        if (this.neighbours.length === 0) return;
         let sumX = 0;
         let sumY = 0;
         for (const boid of this.neighbours) {
@@ -78,9 +91,8 @@ class Boid {
             sumY += boid.vy;
         }
 
-        if (this.neighbours.length === 0) return;
-        this.vx += sumX / this.neighbours.length * ALIGNMENT_POWER;
-        this.vy += sumY / this.neighbours.length * ALIGNMENT_POWER;
+        this.ax += (sumX / this.neighbours.length) * ALIGNMENT_POWER;
+        this.ay += (sumY / this.neighbours.length) * ALIGNMENT_POWER;
     }
 
     cohesion() {
@@ -88,7 +100,7 @@ class Boid {
         let sumY = 0;
         let count = 0;
         for (const boid of this.neighbours) {
-            if (distanceSquared(this, boid) <= SEPARATION_DISTANCE_SQUARED) {
+            if (distanceSquared(this, boid) >= SEPARATION_DISTANCE_SQUARED) {
                 sumX += boid.x;
                 sumY += boid.y;
                 count++;
@@ -98,14 +110,20 @@ class Boid {
         if (count === 0) return;
         const averageX = sumX / count;
         const averageY = sumY / count;
-        this.vx += (averageX - this.x) * COHESION_POWER;
-        this.vy += (averageY - this.y) * COHESION_POWER;
+        this.ax += (averageX - this.x) * COHESION_POWER;
+        this.ay += (averageY - this.y) * COHESION_POWER;
     }
 
     update() {
         this.separation();
         this.cohesion();
         this.alignment();
+
+        const accMagnitude = Math.sqrt(this.ax * this.ax + this.ay * this.ay);
+        if (accMagnitude > MAX_ACCELERATION) {
+            this.ax = (this.ax / accMagnitude) * MAX_ACCELERATION;
+            this.ay = (this.ay / accMagnitude) * MAX_ACCELERATION;
+        }
     }
 }
 
@@ -115,7 +133,7 @@ class Board {
         this.ctx = this.canvas.getContext("2d");
         this.boids = [];
         for (let i = 0; i < boidsCount; i++) {
-            this.boids.push(new Boid(randomInclusiveInt(0, 500), randomInclusiveInt(0, 500)))
+            this.boids.push(new Boid(randomInclusiveInt(0, 500), randomInclusiveInt(0, 500)));
         }
         this.ctx.fillStyle = "green";
         this.ctx.fillRect(10, 10, 100, 100);
@@ -125,7 +143,7 @@ class Board {
         for (const boid of this.boids) boid.neighbours = [];
 
         for (let i = 0; i < this.boids.length - 1; i++) {
-            const boid1 = this.boids[i]
+            const boid1 = this.boids[i];
             for (let j = i + 1; j < this.boids.length; j++) {
                 const boid2 = this.boids[j];
 
