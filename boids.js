@@ -5,8 +5,9 @@ const SEPARATION_DISTANCE_SQUARED = 20 ** 2;
 const ALIGNMENT_POWER = 2;
 const COHESION_POWER = 1;
 const MAX_VELOCITY = 5;
-const MAX_ACCELERATION = 0.5;
+const MAX_ACCELERATION = 0.1;
 const FRICTION = 0.8;
+const LINE_MULTIPLIER = 10;
 
 function distanceSquared(u, v) {
     const dx = u.x - v.x;
@@ -180,6 +181,15 @@ class Board {
         this.ctx.fillStyle = "red";
         for (const boid of this.boids) {
             this.ctx.fillRect(boid.x - 5, boid.y - 5, 10, 10);
+        }
+
+        this.ctx.strokeStyle = "blue";
+        this.ctx.lineWidth = 2;
+        for (const boid of this.boids) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(boid.x, boid.y);
+            this.ctx.lineTo(boid.x + boid.vx * LINE_MULTIPLIER, boid.y + boid.vy * LINE_MULTIPLIER);
+            this.ctx.stroke();
         }
     }
 
