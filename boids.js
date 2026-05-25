@@ -40,26 +40,20 @@ class Boid {
             this.vx = (this.vx / velMagnitude) * MAX_VELOCITY;
             this.vy = (this.vy / velMagnitude) * MAX_VELOCITY;
         }
-        this.vx * FRICTION;
-        this.vy * FRICTION;
 
         this.x += this.vx;
         this.y += this.vy;
 
         if (this.x < 0) {
-            this.x = 0;
-            this.vx *= -1;
+            this.x += width;
         } else if (this.x > width) {
-            this.x = width;
-            this.vx *= -1;
+            this.x = width - this.x;
         }
 
         if (this.y < 0) {
-            this.y = 0;
-            this.vy *= -1;
+            this.y += height;
         } else if (this.y > height) {
-            this.y = height;
-            this.vy *= -1;
+            this.y = height - this.y;
         }
 
         this.ax = 0;
