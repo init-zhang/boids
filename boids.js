@@ -1,9 +1,9 @@
 const BOIDS = 100;
 const DISTANCE_SQUARED = 100 ** 2;
-const SEPARATION_DISTANCE_SQUARED = 50 ** 2;
+const SEPARATION_DISTANCE_SQUARED = 20 ** 2;
 const SEPARATION_POWER = 0.5;
-const ALIGNMENT_POWER  = 0.9;
-const COHESION_POWER   = 0.5;
+const ALIGNMENT_POWER  = 0.2;
+const COHESION_POWER   = 0.1;
 const MAX_VELOCITY     = 5;
 const MAX_ACCELERATION = 0.1;
 const LINE_MULTIPLIER = 10;
@@ -168,7 +168,7 @@ class Board {
     }
 
     draw() {
-        this.ctx.fillStyle = "rgba(255,255,255,0.1)";
+        this.ctx.fillStyle = "rgba(255,255,255,0.2)";
         this.ctx.fillRect(0, 0, this.width, this.height);
 
         this.ctx.fillStyle = "red";
