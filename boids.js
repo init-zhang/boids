@@ -1,12 +1,11 @@
 const BOIDS = 100;
 const DISTANCE_SQUARED = 100 ** 2;
-const SEPARATION_POWER = 5;
-const SEPARATION_DISTANCE_SQUARED = 20 ** 2;
-const ALIGNMENT_POWER = 2;
-const COHESION_POWER = 1;
-const MAX_VELOCITY = 5;
+const SEPARATION_DISTANCE_SQUARED = 50 ** 2;
+const SEPARATION_POWER = 0.5;
+const ALIGNMENT_POWER  = 0.9;
+const COHESION_POWER   = 0.5;
+const MAX_VELOCITY     = 5;
 const MAX_ACCELERATION = 0.1;
-const FRICTION = 0.8;
 const LINE_MULTIPLIER = 10;
 
 function distanceSquared(u, v) {
@@ -66,15 +65,15 @@ class Boid {
         let count = 0;
         for (const boid of this.neighbours) {
             if (distanceSquared(this, boid) < SEPARATION_DISTANCE_SQUARED) {
-                sumX += this.x - boid.x;
-                sumY += this.y - boid.y;
+                sumX += boid.x;
+                sumY += boid.y;
                 count++;
             }
         }
 
         if (count === 0) return;
-        this.ax += (sumX / count) * SEPARATION_POWER;
-        this.ay += (sumY / count) * SEPARATION_POWER;
+        this.ax += (this.x - sumX / count) * SEPARATION_POWER;
+        this.ay += (this.y - sumY / count) * SEPARATION_POWER;
     }
 
     alignment() {
@@ -169,7 +168,7 @@ class Board {
     }
 
     draw() {
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = "rgba(255,255,255,0.1)";
         this.ctx.fillRect(0, 0, this.width, this.height);
 
         this.ctx.fillStyle = "red";
