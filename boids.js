@@ -9,7 +9,7 @@ const MAX_ACCELERATION = 0.1;
 const LINE_MULTIPLIER = 10;
 const TRAIL = 0.8;
 
-function addListener(sliderID, config, defaultValue) {
+function addRangeListener(sliderID, config, defaultValue) {
     const input = document.getElementById(sliderID);
     const span = document.getElementById(sliderID + "Value");
     input.value = defaultValue;
@@ -225,20 +225,44 @@ const defaultConfig = {
     lineMultiplier: LINE_MULTIPLIER,
     trail: TRAIL
 }
-const board = new Board("canvas", BOIDS, defaultConfig);
+let board = new Board("canvas", BOIDS, defaultConfig);
 
-addListener("distance", defaultConfig, Math.sqrt(DISTANCE_SQUARED));
-addListener("separationDistance", defaultConfig, Math.sqrt(SEPARATION_DISTANCE_SQUARED));
-addListener("separationPower", defaultConfig, SEPARATION_POWER);
-addListener("alignmentPower", defaultConfig, ALIGNMENT_POWER);
-addListener("cohesionPower", defaultConfig, COHESION_POWER);
-addListener("maxVelocity", defaultConfig, MAX_VELOCITY);
-addListener("maxAcceleration", defaultConfig, MAX_ACCELERATION);
-addListener("lineMultiplier", defaultConfig, LINE_MULTIPLIER);
-addListener("trail", defaultConfig, TRAIL);
+addRangeListener("distance", defaultConfig, Math.sqrt(DISTANCE_SQUARED));
+addRangeListener("separationDistance", defaultConfig, Math.sqrt(SEPARATION_DISTANCE_SQUARED));
+addRangeListener("separationPower", defaultConfig, SEPARATION_POWER);
+addRangeListener("alignmentPower", defaultConfig, ALIGNMENT_POWER);
+addRangeListener("cohesionPower", defaultConfig, COHESION_POWER);
+addRangeListener("maxVelocity", defaultConfig, MAX_VELOCITY);
+addRangeListener("maxAcceleration", defaultConfig, MAX_ACCELERATION);
+addRangeListener("lineMultiplier", defaultConfig, LINE_MULTIPLIER);
+addRangeListener("trail", defaultConfig, TRAIL);
+
+let running = true;
+
+const toggleButton = document.getElementById("toggle");
+toggleButton.addEventListener("click", () => {
+    if (running) {
+        toggleButton.value = "Resume";
+        running = false;
+    } else {
+        toggleButton.value = "Pause";
+        running = true;
+        updateLoop();
+    }
+});
+
+let boids = BOIDS;
+const boidsInput = document.getElementById("boids")
+boidsInput.addEventListener("input", () => {
+    boids = boidsInput.value;
+});
+
+document.getElementById("restart").addEventListener("click", () => {
+    board = new Board("canvas", boids, defaultConfig);
+});
 
 function updateLoop() {
     board.update();
-    requestAnimationFrame(() => updateLoop());
+    if (running) requestAnimationFrame(() => updateLoop());
 }
 updateLoop();
