@@ -9,6 +9,22 @@ const MAX_ACCELERATION = 0.1;
 const LINE_MULTIPLIER = 10;
 const TRAIL = 0.8;
 
+function addListener(sliderID, config, defaultValue) {
+    const input = document.getElementById(sliderID);
+    const span = document.getElementById(sliderID + "Value");
+    input.value = defaultValue;
+    span.textContent = input.value;
+    input.addEventListener("input", () => {
+        // Specific use case for distances as they need to be squared
+        if (sliderID === "distance" | sliderID === "separationDistance") {
+            config[sliderID + "Squared"] = Number(input.value) ** 2;
+        } else {
+            config[sliderID] = Number(input.value);
+        }
+        span.textContent = input.value;
+    });
+}
+
 function distanceSquared(u, v) {
     const dx = u.x - v.x;
     const dy = u.y - v.y;
@@ -210,6 +226,16 @@ const defaultConfig = {
     trail: TRAIL
 }
 const board = new Board("canvas", BOIDS, defaultConfig);
+
+addListener("distance", defaultConfig, Math.sqrt(DISTANCE_SQUARED));
+addListener("separationDistance", defaultConfig, Math.sqrt(SEPARATION_DISTANCE_SQUARED));
+addListener("separationPower", defaultConfig, SEPARATION_POWER);
+addListener("alignmentPower", defaultConfig, ALIGNMENT_POWER);
+addListener("cohesionPower", defaultConfig, COHESION_POWER);
+addListener("maxVelocity", defaultConfig, MAX_VELOCITY);
+addListener("maxAcceleration", defaultConfig, MAX_ACCELERATION);
+addListener("lineMultiplier", defaultConfig, LINE_MULTIPLIER);
+addListener("trail", defaultConfig, TRAIL);
 
 function updateLoop() {
     board.update();
