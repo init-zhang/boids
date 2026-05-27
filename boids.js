@@ -9,6 +9,23 @@ const MAX_ACCELERATION = 0.1;
 const LINE_MULTIPLIER = 10;
 const TRAIL = 0.8;
 
+const mouse = { x: 0, y: 0};
+document.addEventListener('mousemove', (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+let followMouse = false;
+let avoidMouse = false;
+const followCheckbox = document.getElementById("follow");
+followCheckbox.addEventListener("click", () => {
+    followMouse = followCheckbox.checked;
+});
+const avoidCheckbox = document.getElementById("avoid");
+avoidCheckbox.addEventListener("click", () => {
+    avoidMouse = avoidCheckbox.checked;
+});
+
 function addRangeListener(sliderID, config, defaultValue) {
     const input = document.getElementById(sliderID);
     const span = document.getElementById(sliderID + "Value");
@@ -132,10 +149,26 @@ class Boid {
         this.ay += (averageY - this.y) * this.config.cohesionPower;
     }
 
+    attraction() {
+        if (followMouse) {
+            this.ax += mouse.x - this.x;
+            this.ay += mouse.y - this.y;
+        }
+    }
+
+    avoid() {
+        if (avoidMouse) {
+            this.ax += this.x - mouse.x;
+            this.ay += this.y - mouse.y;
+        }
+    }
+
     update() {
         this.separation();
         this.cohesion();
         this.alignment();
+        this.attraction();
+        this.avoid();
     }
 }
 
