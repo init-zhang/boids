@@ -143,10 +143,8 @@ class Boid {
         }
 
         if (count === 0) return;
-        const averageX = sumX / count;
-        const averageY = sumY / count;
-        this.ax += (averageX - this.x) * this.config.cohesionPower;
-        this.ay += (averageY - this.y) * this.config.cohesionPower;
+        this.ax += (sumX / count - this.x) * this.config.cohesionPower;
+        this.ay += (sumY / count - this.y) * this.config.cohesionPower;
     }
 
     attraction() {
@@ -225,13 +223,10 @@ class Board {
         this.ctx.fillRect(0, 0, this.config.width, this.config.height);
 
         this.ctx.fillStyle = "red";
-        for (const boid of this.boids) {
-            this.ctx.fillRect(boid.x - 5, boid.y - 5, 10, 10);
-        }
-
         this.ctx.strokeStyle = "blue";
         this.ctx.lineWidth = 2;
         for (const boid of this.boids) {
+            this.ctx.fillRect(boid.x - 5, boid.y - 5, 10, 10);
             this.ctx.beginPath();
             this.ctx.moveTo(boid.x, boid.y);
             this.ctx.lineTo(boid.x + boid.vx * this.config.lineMultiplier, boid.y + boid.vy * this.config.lineMultiplier);
@@ -242,7 +237,7 @@ class Board {
     update() {
         this.updateNeighbours();
         for (const boid of this.boids) boid.update();
-        for (const boid of this.boids) boid.move(this.config.width, this.config.height);
+        for (const boid of this.boids) boid.move();
         this.draw();
     }
 }
